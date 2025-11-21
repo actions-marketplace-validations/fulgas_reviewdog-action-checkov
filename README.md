@@ -1,6 +1,6 @@
 # Checkov + Reviewdog GitHub Action
 
-[![Marketplace](https://img.shields.io/badge/marketplace-Checkov%20%2B%20Reviewdog-blue)](https://github.com/marketplace/actions/run-checkov-with-reviewdog)
+[![Marketplace](https://img.shields.io/badge/marketplace-Checkov%20%2B%20Reviewdog-blue)](https://github.com/marketplace/actions/run-checkov-with-reviewdog) [![GitHub release](https://img.shields.io/github/v/release/fulgas/reviewdog-action-checkov?label=release)](https://github.com/fulgas/reviewdog-action-checkov/releases)
 
 A GitHub Action that runs [Checkov](https://www.checkov.io/) for Infrastructure as Code (IaC) security scanning and reports results to pull requests using [reviewdog](https://github.com/reviewdog/reviewdog).
 

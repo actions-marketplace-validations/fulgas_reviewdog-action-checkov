@@ -1,6 +1,6 @@
 name: 'Run Checkov with reviewdog'
 description: 'Run Checkov for IaC security scanning and report results using reviewdog'
-author: 'Your Name'
+author: 'Nelson Silva <nelson.emanuel.silva@gmail.com>'
 
 inputs:
   github_token:
@@ -78,5 +78,5 @@ runs:
     - ${{ inputs.flags }}
 
 branding:
-  icon: 'check-circle'
+  icon: 'shield'
   color: 'blue'

@@ -5,5 +5,18 @@ merge_protections:
       - base = main
     success_conditions:
       - "title ~=
-        ^(fix|feat|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\(.+\
-        \\))?:"
+        ^(fix|feat|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\(.+\\))?:"
+
+
+pull_request_rules:
+  - name: Auto merge if checks pass
+    conditions:
+      - base = main
+      - label = dependencies
+      - label = reviewdog
+      - label = checkov
+      - label = automated
+      - merge_protection_passed
+    actions:
+      merge:
+        method: squash

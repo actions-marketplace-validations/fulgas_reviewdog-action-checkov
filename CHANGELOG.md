@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.0.2...v1.0.3) (2025-11-22)
+
+
+### Bug Fixes
+
+* improve dockerfile ([6b53616](https://github.com/fulgas/reviewdog-action-checkov/commit/6b53616642bbe56c614ff85ad1ac64d1284022d9))
+
 ## [1.0.2](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.0.1...v1.0.2) (2025-11-22)
 
 

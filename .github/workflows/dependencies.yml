@@ -49,6 +49,10 @@ jobs:
           if [ "${{ steps.get_versions.outputs.checkov-latest }}" != "${{ steps.get_versions.outputs.checkov-current }}" ]; then
             echo "✅ New Checkov version found: ${{ steps.get_versions.outputs.checkov-current }} -> ${{ steps.get_versions.outputs.checkov-latest }}"
             sed -i "s/ENV CHECKOV_VERSION=${{ steps.get_versions.outputs.checkov-current }}/ENV CHECKOV_VERSION=${{ steps.get_versions.outputs.checkov-latest }}/" Dockerfile
+          
+            # Update Checkov badge in README
+            sed -i "s/Checkov-[0-9.]*-6B46C1/Checkov-${{ steps.get_versions.outputs.checkov-latest }}-6B46C1/" README.md
+          
             MADE_CHANGES=true
             CHANGELOG+="- checkov: ${{ steps.get_versions.outputs.checkov-current }} -> ${{ steps.get_versions.outputs.checkov-latest }}\n"
           else
@@ -57,6 +61,11 @@ jobs:
           if [ "${{ steps.get_versions.outputs.reviewdog-latest }}" != "${{ steps.get_versions.outputs.reviewdog-current }}" ]; then
             echo "✅ New reviewdog version found: ${{ steps.get_versions.outputs.reviewdog-current }} -> ${{ steps.get_versions.outputs.reviewdog-latest }}"
             sed -i "s/ENV REVIEWDOG_VERSION=${{ steps.get_versions.outputs.reviewdog-current }}/ENV REVIEWDOG_VERSION=${{ steps.get_versions.outputs.reviewdog-latest }}/" Dockerfile
+          
+            REVIEWDOG_VERSION_NO_V="${{ steps.get_versions.outputs.reviewdog-latest }}"
+            REVIEWDOG_VERSION_NO_V="${REVIEWDOG_VERSION_NO_V#v}"
+            sed -i "s/Reviewdog-[0-9.]*-F97316/Reviewdog-${REVIEWDOG_VERSION_NO_V}-F97316/" README.md
+          
             MADE_CHANGES=true
             CHANGELOG+="- reviewdog: ${{ steps.get_versions.outputs.reviewdog-current }} -> ${{ steps.get_versions.outputs.reviewdog-latest }}\n"
           else
@@ -82,7 +91,7 @@ jobs:
             
             ${{ steps.prepare-changes.outputs.changelog }}
 
-          title: 'feat: Automated Dependency Updates'
+          title: 'feat: automated dependency updates'
           body: |
             ## Automated Dependency Update
             
@@ -90,6 +99,10 @@ jobs:
             
             ### Changes:
             ${{ steps.prepare-changes.outputs.changelog }}
+            
+            ### Files Updated:
+            - `Dockerfile` - Updated version environment variables
+            - `README.md` - Updated version badges
             
             ---
             

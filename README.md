@@ -69,7 +69,7 @@ jobs:
   checkov:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/fulgas/reviewdog-action-checkov:latest
+      image: ghcr.io/fulgas/reviewdog-action-checkov:1.0.3
     steps:
       - uses: actions/checkout@v4
       

@@ -14,6 +14,11 @@
             "files": ["README.md"],
             "from": "fulgas\/reviewdog-action-checkov@v.*",
             "to": "fulgas\/reviewdog-action-checkov@v${nextRelease.version}"
+          },
+          {
+            "files": ["README.md"],
+            "from": "ghcr.io\/fulgas\/reviewdog-action-checkov:.*",
+            "to": "ghcr.io\/fulgas\/reviewdog-action-checkov:${nextRelease.version}"
           }
         ]
       }

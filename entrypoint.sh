@@ -1,14 +1,13 @@
 #!/bin/bash
-
 set -Eeuo pipefail
 
-# --- START: FIX FOR LOCAL TESTING ---
-# Set default values for GitHub environment variables if they are not set.
-# This makes the script runnable locally for testing.
+###############################################################################
+# Environment defaults
+###############################################################################
 export GITHUB_WORKSPACE="${GITHUB_WORKSPACE:-/github/workspace}"
 export GITHUB_OUTPUT="${GITHUB_OUTPUT:-/tmp/github_output}"
 
-# Set defaults for action inputs, matching the action.yml defaults
+export INPUT_GITHUB_TOKEN="${INPUT_GITHUB_TOKEN:-}"
 export INPUT_WORKING_DIRECTORY="${INPUT_WORKING_DIRECTORY:-.}"
 export INPUT_TARGET_DIR="${INPUT_TARGET_DIR:-.}"
 export INPUT_REPORTER="${INPUT_REPORTER:-github-pr-check}"
@@ -20,55 +19,107 @@ export INPUT_SKIP_CHECK="${INPUT_SKIP_CHECK:-}"
 export INPUT_FRAMEWORK="${INPUT_FRAMEWORK:-}"
 export INPUT_FLAGS="${INPUT_FLAGS:-}"
 
+###############################################################################
+# Ensure GITHUB_OUTPUT exists
+###############################################################################
 if [ ! -f "${GITHUB_OUTPUT}" ]; then
   mkdir -p "$(dirname "${GITHUB_OUTPUT}")"
   touch "${GITHUB_OUTPUT}"
 fi
 
+###############################################################################
+# Move into working directory
+###############################################################################
 cd "${GITHUB_WORKSPACE}/${INPUT_WORKING_DIRECTORY}" || exit 1
 
+###############################################################################
+# Tools check
+###############################################################################
 echo '::group::✅ Verifying tools'
   reviewdog -version
   checkov --version
 echo '::endgroup::'
 
-echo '::group::🔍 Running Checkov with reviewdog 🐶 ...'
-  export REVIEWDOG_GITHUB_API_TOKEN="${INPUT_GITHUB_TOKEN}"
+###############################################################################
+# Build dynamic Checkov args
+###############################################################################
+CHECKOV_ARGS=()
 
-  CHECKOV_ARGS=""
+if [[ -n "${INPUT_SKIP_CHECK:-}" ]]; then
+  for check in ${INPUT_SKIP_CHECK}; do
+     CHECKOV_ARGS+=("--skip-check" "${check}")
+  done
+fi
 
-  if [[ -n "${INPUT_SKIP_CHECK:-}" ]]; then
-    for check in ${INPUT_SKIP_CHECK}; do
-      CHECKOV_ARGS="${CHECKOV_ARGS} --skip-check ${check}"
-    done
-  fi
+if [[ -n "${INPUT_FRAMEWORK:-}" ]]; then
+  CHECKOV_ARGS+=("--framework" "${INPUT_FRAMEWORK}")
+fi
 
-  if [[ -n "${INPUT_FRAMEWORK:-}" ]]; then
-    CHECKOV_ARGS="${CHECKOV_ARGS} --framework ${INPUT_FRAMEWORK}"
-  fi
+# Add custom flags
+if [[ -n "${INPUT_FLAGS:-}" ]]; then
+  for f in ${INPUT_FLAGS}; do
+    CHECKOV_ARGS+=("${f}")
+  done
+fi
 
-  # Add custom flags
-  if [[ -n "${INPUT_FLAGS:-}" ]]; then
-    CHECKOV_ARGS="${CHECKOV_ARGS} ${INPUT_FLAGS}"
-  fi
+###############################################################################
+# Run Checkov
+###############################################################################
+echo '::group::🔍 Running Checkov (quiet mode)…'
 
-  TARGET_DIR="${INPUT_TARGET_DIR:-.}"
+TARGET_DIR="${INPUT_TARGET_DIR:-.}"
+RESULT_SARIF=$(mktemp -d)
+SARIF_FILE="$RESULT_SARIF/results_sarif.sarif"
+echo "Directory: ${TARGET_DIR}"
+echo "Checkov args: ${CHECKOV_ARGS[*]}"
 
-  echo "checkov --directory ${TARGET_DIR} --output sarif ${CHECKOV_ARGS}"
+set +Eeuo pipefail
 
-  set +Eeuo pipefail
+checkov --compact --quiet --directory "${TARGET_DIR}" --output sarif --output-file-path "${RESULT_SARIF}" "${CHECKOV_ARGS[@]}" 2>/dev/null
 
-  checkov --directory "${TARGET_DIR}" --output sarif "${CHECKOV_ARGS}" 2>&1 \
-    | reviewdog -f=sarif \
-        -name="checkov" \
-        -reporter="${INPUT_REPORTER}" \
-        -level="${INPUT_LEVEL}" \
-        -filter-mode="${INPUT_FILTER_MODE}" \
-        -fail-level="${INPUT_FAIL_LEVEL}"
+checkov_return=$?
 
-  checkov_return="${PIPESTATUS[0]}" reviewdog_return="${PIPESTATUS[1]}" exit_code=$?
-  echo "checkov-return-code=${checkov_return}" >> "${GITHUB_OUTPUT}"
-  echo "reviewdog-return-code=${reviewdog_return}" >> "${GITHUB_OUTPUT}"
+set -Eeuo pipefail
+
+###############################################################################
+# Validate SARIF file exists & is not empty
+###############################################################################
+if [[ ! -s "${SARIF_FILE}" ]]; then
+  echo "❌ Checkov did not generate SARIF output (${SARIF_FILE} missing or empty)"
+  echo "::endgroup::"
+  exit "${checkov_return}"
+fi
 echo '::endgroup::'
 
-exit "${exit_code}"
+###############################################################################
+# Run Reviewdog
+###############################################################################
+echo '::group::🐶 Running reviewdog'
+
+export REVIEWDOG_GITHUB_API_TOKEN="${INPUT_GITHUB_TOKEN}"
+set +Eeuo pipefail
+# shellcheck disable=SC2002
+cat "${SARIF_FILE}" | reviewdog \
+  -f=sarif \
+  -name="checkov" \
+  -reporter="${INPUT_REPORTER}" \
+  -level="${INPUT_LEVEL}" \
+  -filter-mode="${INPUT_FILTER_MODE}" \
+  -fail-level="${INPUT_FAIL_LEVEL}"
+
+reviewdog_return=$?
+set -Eeuo pipefail
+
+echo '::endgroup::'
+###############################################################################
+# Pipeline result handling
+###############################################################################
+echo "::group::📦 Pipeline exit summary"
+echo "Checkov exit code: ${checkov_return}"
+echo "Reviewdog exit code: ${reviewdog_return}"
+echo "::endgroup::"
+
+echo "checkov-return-code=${checkov_return}" >> "${GITHUB_OUTPUT}"
+echo "reviewdog-return-code=${reviewdog_return}" >> "${GITHUB_OUTPUT}"
+
+exit "${reviewdog_return}"

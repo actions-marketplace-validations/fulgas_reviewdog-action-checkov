@@ -51,13 +51,4 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-
-RUN useradd -m -u 1000 action && \
-    mkdir -p /github/workspace && \
-    chown -R action:action /github/workspace
-
-USER action
-
-WORKDIR /github/workspace
-
 ENTRYPOINT ["/entrypoint.sh"]

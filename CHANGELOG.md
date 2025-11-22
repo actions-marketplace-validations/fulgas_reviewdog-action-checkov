@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.0.4...v1.1.0) (2025-11-22)
+
+
+### Features
+
+* pin docker images ([84521ec](https://github.com/fulgas/reviewdog-action-checkov/commit/84521ec244a976d354bae6ffd05b1585b7adf8df))
+
 ## [1.0.4](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.0.3...v1.0.4) (2025-11-22)
 
 

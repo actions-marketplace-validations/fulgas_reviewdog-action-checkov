@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.0.1...v1.0.2) (2025-11-22)
+
+
+### Bug Fixes
+
+* improve dynamic args for checkov ([0674942](https://github.com/fulgas/reviewdog-action-checkov/commit/0674942334bc56a59dcb764e23bbc9329ebbc37a))
+
 ## [1.0.1](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.0.0...v1.0.1) (2025-11-21)
 
 

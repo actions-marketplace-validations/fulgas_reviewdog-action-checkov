@@ -61,7 +61,6 @@ outputs:
     description: 'reviewdog command return code'
     value: ${{ steps.checkov.outputs.reviewdog-return-code }}
 
-
 runs:
   using: 'docker'
   image: 'Dockerfile'

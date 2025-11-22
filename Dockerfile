@@ -45,10 +45,8 @@ COPY --from=python-builder /opt/venv /opt/venv
 
 COPY --from=reviewdog-builder /usr/local/bin/reviewdog /usr/local/bin/reviewdog
 
-
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY --chmod=755 entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

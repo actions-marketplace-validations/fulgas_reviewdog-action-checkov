@@ -43,6 +43,7 @@ jobs:
             @semantic-release/git
             @semantic-release/changelog
             @semantic-release/github
+            semantic-release-replace-plugin
         env:
           GIT_AUTHOR_NAME: semautobot
           GIT_AUTHOR_EMAIL: semautobot@users.noreply.github.com

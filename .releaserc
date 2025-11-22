@@ -6,8 +6,20 @@
     ["@semantic-release/changelog", {
       "changelogFile": "CHANGELOG.md"
     }],
+    [
+      "semantic-release-replace-plugin",
+      {
+        "replacements": [
+          {
+            "files": ["README.md"],
+            "from": "fulgas\/reviewdog-action-checkov@v.*",
+            "to": "fulgas\/reviewdog-action-checkov@v${nextRelease.version}"
+          }
+        ]
+      }
+    ],
     ["@semantic-release/git", {
-      "assets": ["CHANGELOG.md"],
+      "assets": ["CHANGELOG.md", "README.md"],
       "message": "chore(release): ${nextRelease.version} [skip ci]"
     }],
     "@semantic-release/github"

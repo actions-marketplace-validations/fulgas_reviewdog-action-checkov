@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.1.0...v1.2.0) (2025-11-25)
+
+
+### Features
+
+* update dependencies ([fc51851](https://github.com/fulgas/reviewdog-action-checkov/commit/fc51851707f7f19b5fbaf5aefa2c6bacd61a6aff))
+
 # [1.1.0](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.0.4...v1.1.0) (2025-11-22)
 
 

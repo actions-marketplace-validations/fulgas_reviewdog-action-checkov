@@ -2,8 +2,8 @@
 
 [![Marketplace](https://img.shields.io/badge/marketplace-Checkov%20%2B%20Reviewdog-blue)](https://github.com/marketplace/actions/run-checkov-with-reviewdog)
 [![GitHub release](https://img.shields.io/github/v/release/fulgas/reviewdog-action-checkov?label=release)](https://github.com/fulgas/reviewdog-action-checkov/releases)
-[![Checkov](https://img.shields.io/badge/Checkov-3.2.495-6B46C1?logo=python&logoColor=white)](https://www.checkov.io/)
-[![Reviewdog](https://img.shields.io/badge/Reviewdog-0.21.0-F97316?logo=go&logoColor=white)](https://github.com/reviewdog/reviewdog)
+[![Checkov](https://img.shields.io/github/v/release/bridgecrewio/checkov?label=Checkov&color=6B46C1&logo=python&logoColor=white)](https://www.checkov.io/)
+[![Reviewdog](https://img.shields.io/github/v/release/reviewdog/reviewdog?label=Reviewdog&color=F97316&logo=go&logoColor=white)](https://github.com/reviewdog/reviewdog)
 
 A GitHub Action that runs [Checkov](https://www.checkov.io/) for Infrastructure as Code (IaC) security scanning and reports results to pull requests using [reviewdog](https://github.com/reviewdog/reviewdog).
 
@@ -14,6 +14,7 @@ A GitHub Action that runs [Checkov](https://www.checkov.io/) for Infrastructure 
 - 🎯 Configurable severity levels and filters
 - 🚀 Easy to integrate into existing workflows
 - 🐳 Available as Docker image on GHCR
+- 🤖 Automated dependency updates via Renovate
 
 ## Usage
 
@@ -28,9 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run Checkov with reviewdog
-        uses: fulgas/reviewdog-action-checkov@v1.2.0
+        uses: fulgas/reviewdog-action-checkov@v1.0.4
         with:
           github_token: ${{ secrets.github_token }}
 ```
@@ -46,9 +47,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run Checkov with reviewdog
-        uses: fulgas/reviewdog-action-checkov@v1.2.0
+        uses: fulgas/reviewdog-action-checkov@v1.0.4
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -72,10 +73,10 @@ jobs:
   checkov:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/fulgas/reviewdog-action-checkov:1.2.0
+      image: ghcr.io/fulgas/reviewdog-action-checkov:1.0.4
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run Checkov
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.github_token }}
@@ -119,7 +120,7 @@ jobs:
 ### Scan only Terraform files
 
 ```yaml
-- uses: fulgas/reviewdog-action-checkov@v1.2.0
+- uses: fulgas/reviewdog-action-checkov@v1.0.4
   with:
     github_token: ${{ secrets.github_token }}
     framework: terraform
@@ -128,7 +129,7 @@ jobs:
 ### Skip specific checks
 
 ```yaml
-- uses: fulgas/reviewdog-action-checkov@v1.2.0
+- uses: fulgas/reviewdog-action-checkov@v1.0.4
   with:
     github_token: ${{ secrets.github_token }}
     skip_check: "CKV_AWS_1 CKV_AWS_18 CKV_AWS_19"
@@ -137,7 +138,7 @@ jobs:
 ### Scan specific directory
 
 ```yaml
-- uses: fulgas/reviewdog-action-checkov@v1.2.0
+- uses: fulgas/reviewdog-action-checkov@v1.0.4
   with:
     github_token: ${{ secrets.github_token }}
     working_directory: infrastructure/
@@ -147,7 +148,7 @@ jobs:
 ### Fail on warnings
 
 ```yaml
-- uses: fulgas/reviewdog-action-checkov@v1.2.0
+- uses: fulgas/reviewdog-action-checkov@v1.0.4
   with:
     github_token: ${{ secrets.github_token }}
     fail_level: warning

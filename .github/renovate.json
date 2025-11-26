@@ -15,6 +15,35 @@
       "description": "Group GitHub Actions updates",
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions"
+    },
+    {
+      "description": "Group security tools (Checkov & Reviewdog)",
+      "matchFileNames": ["Dockerfile"],
+      "matchPackagePatterns": ["checkov", "reviewdog"],
+      "groupName": "security-tools",
+      "labels": ["dependencies", "security-tools"],
+      "semanticCommitType": "feat",
+      "semanticCommitScope": "deps"
+    }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "ENV CHECKOV_VERSION=(?<currentValue>.*?)\\n"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "bridgecrewio/checkov",
+      "extractVersionTemplate": "^(?<version>.*)$"
+    },
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "ENV REVIEWDOG_VERSION=(?<currentValue>.*?)\\n"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "reviewdog/reviewdog",
+      "extractVersionTemplate": "^(?<version>.*)$"
     }
   ]
 }

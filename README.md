@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Checkov with reviewdog
-        uses: fulgas/reviewdog-action-checkov@v2.0.0
+        uses: fulgas/reviewdog-action-checkov@v2.0.1
         with:
           github_token: ${{ secrets.github_token }}
 ```
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Checkov with reviewdog
-        uses: fulgas/reviewdog-action-checkov@v2.0.0
+        uses: fulgas/reviewdog-action-checkov@v2.0.1
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
@@ -80,7 +80,7 @@ jobs:
   checkov:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/fulgas/reviewdog-action-checkov:2.0.0
+      image: ghcr.io/fulgas/reviewdog-action-checkov:2.0.1
     steps:
       - uses: actions/checkout@v4
 
@@ -104,18 +104,18 @@ jobs:
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|       INPUT       |  TYPE  | REQUIRED |       DEFAULT       |                                     DESCRIPTION                                      |
-|-------------------|--------|----------|---------------------|--------------------------------------------------------------------------------------|
-|    fail_level     | string |  false   |      `"error"`      | If set to none, always use <br>exit code 0. Otherwise fail if <br>findings >= level  |
-|    filter_mode    | string |  false   |      `"added"`      |           Filtering mode for reviewdog [added,diff_context,file,nofilter]            |
-|       flags       | string |  false   |                     |                         Additional flags to pass to Checkov                          |
-|     framework     | string |  false   |                     |     Comma-separated list of frameworks to scan <br>(e.g., terraform,kubernetes)      |
-|   github_token    | string |   true   |                     |                                     GITHUB_TOKEN                                     |
-|       level       | string |  false   |      `"error"`      |                   Report level for reviewdog [info,warning,error]                    |
-|     reporter      | string |  false   | `"github-pr-check"` |    Reporter of reviewdog command [github-pr-check,github-pr-review,github-check]     |
-|    skip_check     | string |  false   |                     |   Space-separated list of Checkov checks to <br>skip (e.g., CKV_AWS_1 CKV_AWS_2)     |
-|    target_dir     | string |  false   |        `"."`        |                         Target directory for Checkov to scan                         |
-| working_directory | string |  false   |        `"."`        |                           Directory to run the action from                           |
+|                                        INPUT                                        |  TYPE  | REQUIRED |       DEFAULT       |                                     DESCRIPTION                                      |
+|-------------------------------------------------------------------------------------|--------|----------|---------------------|--------------------------------------------------------------------------------------|
+|           <a name="input_fail_level"></a>[fail_level](#input_fail_level)            | string |  false   |      `"error"`      | If set to none, always <br>use exit code 0. Otherwise <br>fail if findings >= level  |
+|          <a name="input_filter_mode"></a>[filter_mode](#input_filter_mode)          | string |  false   |      `"added"`      |           Filtering mode for reviewdog [added,diff_context,file,nofilter]            |
+|                   <a name="input_flags"></a>[flags](#input_flags)                   | string |  false   |                     |                       Additional flags to pass to <br>Checkov                        |
+|             <a name="input_framework"></a>[framework](#input_framework)             | string |  false   |                     |     Comma-separated list of frameworks to <br>scan (e.g., terraform,kubernetes)      |
+|        <a name="input_github_token"></a>[github_token](#input_github_token)         | string |   true   |                     |                                     GITHUB_TOKEN                                     |
+|                   <a name="input_level"></a>[level](#input_level)                   | string |  false   |      `"error"`      |                   Report level for reviewdog [info,warning,error]                    |
+|              <a name="input_reporter"></a>[reporter](#input_reporter)               | string |  false   | `"github-pr-check"` |    Reporter of reviewdog command [github-pr-check,github-pr-review,github-check]     |
+|           <a name="input_skip_check"></a>[skip_check](#input_skip_check)            | string |  false   |                     |   Space-separated list of Checkov checks <br>to skip (e.g., CKV_AWS_1 CKV_AWS_2)     |
+|           <a name="input_target_dir"></a>[target_dir](#input_target_dir)            | string |  false   |        `"."`        |                      Target directory for Checkov to <br>scan                        |
+| <a name="input_working_directory"></a>[working_directory](#input_working_directory) | string |  false   |        `"."`        |                        Directory to run the action <br>from                          |
 
 <!-- AUTO-DOC-INPUT:END -->
 
@@ -123,10 +123,10 @@ jobs:
 
 <!-- AUTO-DOC-OUTPUT:START - Do not remove or modify this section -->
 
-|        OUTPUT         |  TYPE  |          DESCRIPTION          |
-|-----------------------|--------|-------------------------------|
-|  checkov-return-code  | string |  Checkov command return code  |
-| reviewdog-return-code | string | reviewdog command return code |
+|                                              OUTPUT                                               |  TYPE  |          DESCRIPTION          |
+|---------------------------------------------------------------------------------------------------|--------|-------------------------------|
+|    <a name="output_checkov-return-code"></a>[checkov-return-code](#output_checkov-return-code)    | string |  Checkov command return code  |
+| <a name="output_reviewdog-return-code"></a>[reviewdog-return-code](#output_reviewdog-return-code) | string | reviewdog command return code |
 
 <!-- AUTO-DOC-OUTPUT:END -->
 
@@ -143,7 +143,7 @@ jobs:
 ### Scan only Terraform files
 
 ```yaml
-- uses: fulgas/reviewdog-action-checkov@v2.0.0
+- uses: fulgas/reviewdog-action-checkov@v2.0.1
   with:
     github_token: ${{ secrets.github_token }}
     framework: terraform
@@ -152,7 +152,7 @@ jobs:
 ### Skip specific checks
 
 ```yaml
-- uses: fulgas/reviewdog-action-checkov@v2.0.0
+- uses: fulgas/reviewdog-action-checkov@v2.0.1
   with:
     github_token: ${{ secrets.github_token }}
     skip_check: "CKV_AWS_1 CKV_AWS_18 CKV_AWS_19"
@@ -161,7 +161,7 @@ jobs:
 ### Scan specific directory
 
 ```yaml
-- uses: fulgas/reviewdog-action-checkov@v2.0.0
+- uses: fulgas/reviewdog-action-checkov@v2.0.1
   with:
     github_token: ${{ secrets.github_token }}
     working_directory: infrastructure/
@@ -171,7 +171,7 @@ jobs:
 ### Fail on warnings
 
 ```yaml
-- uses: fulgas/reviewdog-action-checkov@v2.0.0
+- uses: fulgas/reviewdog-action-checkov@v2.0.1
   with:
     github_token: ${{ secrets.github_token }}
     fail_level: warning
@@ -222,7 +222,7 @@ docker run --rm \
 
 ### How It Works
 
-1. **Action Usage**: The action uses a pre-built Docker image from GHCR (`ghcr.io/fulgas/reviewdog-action-checkov:2.0.0`)
+1. **Action Usage**: The action uses a pre-built Docker image from GHCR (`ghcr.io/fulgas/reviewdog-action-checkov:2.0.1`)
 2. **CI Testing**: The CI workflow builds the Dockerfile from source and runs tests against it to validate changes
 3. **Publishing**: When a release is created, the Docker image is built and published to GHCR with the release tag
 

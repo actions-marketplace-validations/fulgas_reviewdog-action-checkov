@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/fulgas/reviewdog-action-checkov/compare/v2.0.0...v2.0.1) (2025-11-29)
+
+
+### Bug Fixes
+
+* correct version replacement regex patterns to avoid overwriting content ([914d2e5](https://github.com/fulgas/reviewdog-action-checkov/commit/914d2e587777d85c70bd3c4e3be220f0af8ac99d))
+
 # [2.0.0](https://github.com/fulgas/reviewdog-action-checkov/compare/v1.2.0...v2.0.0) (2025-11-28)
 
 

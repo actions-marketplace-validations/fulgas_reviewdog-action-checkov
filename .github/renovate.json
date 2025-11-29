@@ -41,7 +41,12 @@
       "matchPackageNames": [
         "/checkov/",
         "/reviewdog/"
-      ]
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "automerge": true
     }
   ],
   "customManagers": [

@@ -1,0 +1,25 @@
+name: Basic PR Security Review
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write  # Required for inline comments
+  checks: write
+
+jobs:
+  security-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Security Review
+        uses: fulgas/reviewdog-action-checkov@v2.0.1
+        with:
+          reporter: github-pr-review      # Creates inline PR comments
+          level: warning                  # Show warnings and errors
+          filter_mode: diff_context       # Show context around changes
+          fail_level: none                # Don't fail (advisory mode)

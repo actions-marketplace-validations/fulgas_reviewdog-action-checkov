@@ -95,6 +95,7 @@ jobs:
         id: checkov
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_TOOL_NAME: "reviewdog-action-checkov"
           INPUT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_FRAMEWORK: ${{ matrix.framework }}
           INPUT_WORKING_DIRECTORY: "."
@@ -111,6 +112,7 @@ jobs:
             -e GITHUB_WORKSPACE=/github/workspace \
             -e GITHUB_OUTPUT=/tmp/github_output \
             -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            -e INPUT_TOOL_NAME="${INPUT_TOOL_NAME}" \
             -e INPUT_GITHUB_TOKEN="${INPUT_GITHUB_TOKEN}" \
             -e INPUT_FRAMEWORK="${INPUT_FRAMEWORK}" \
             -e INPUT_WORKING_DIRECTORY="${INPUT_WORKING_DIRECTORY}" \

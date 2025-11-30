@@ -1,0 +1,25 @@
+name: Weekly Security Audit
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Every Sunday at midnight
+  workflow_dispatch:      # Allow manual triggers
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Full Repository Audit
+        uses: fulgas/reviewdog-action-checkov@v2.0.1
+        with:
+          reporter: github-check    # General check (not PR-specific)
+          level: info               # Show all findings
+          filter_mode: nofilter     # Scan entire repository
+          fail_level: none          # Don't fail (just report)

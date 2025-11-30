@@ -5,6 +5,12 @@ author: 'Nelson Silva <2473927+fulgas@users.noreply.github.com>'
 inputs:
   github_token:
     description: 'GITHUB_TOKEN'
+    default: '${{ github.token }}'
+    required: true
+
+  tool_name:
+    description: 'Tool name to use for reviewdog reporter'
+    default: 'reviewdog-action-checkov'
     required: true
 
   level:
@@ -65,7 +71,8 @@ runs:
   using: 'docker'
   image: 'docker://ghcr.io/fulgas/reviewdog-action-checkov:2.0.1'
   env:
-    INPUT_GITHUB_TOKEN: ${{ inputs.github_token }}
+    REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
+    INPUT_TOOL_NAME: ${{ inputs.tool_name }}
     INPUT_LEVEL: ${{ inputs.level }}
     INPUT_REPORTER: ${{ inputs.reporter }}
     INPUT_FILTER_MODE: ${{ inputs.filter_mode }}

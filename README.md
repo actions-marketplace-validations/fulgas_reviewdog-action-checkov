@@ -30,16 +30,22 @@ A GitHub Action that runs [Checkov](https://www.checkov.io/) for Infrastructure 
 name: Checkov Review
 on: [pull_request]
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
 jobs:
   checkov:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Run Checkov with reviewdog
         uses: fulgas/reviewdog-action-checkov@v2.0.1
         with:
-          github_token: ${{ secrets.github_token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### Advanced Example
@@ -48,16 +54,22 @@ jobs:
 name: Checkov Review
 on: [pull_request]
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
 jobs:
   checkov:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Run Checkov with reviewdog
         uses: fulgas/reviewdog-action-checkov@v2.0.1
         with:
-          github_token: ${{ secrets.github_token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           level: warning
           filter_mode: nofilter
@@ -76,18 +88,23 @@ You can also run the action directly using the Docker image:
 name: Checkov Review
 on: [pull_request]
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
 jobs:
   checkov:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/fulgas/reviewdog-action-checkov:2.0.1
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Run Checkov
         env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.github_token }}
-          INPUT_GITHUB_TOKEN: ${{ secrets.github_token }}
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_REPORTER: github-pr-check
           INPUT_LEVEL: error
           INPUT_FILTER_MODE: added
@@ -130,52 +147,331 @@ jobs:
 
 <!-- AUTO-DOC-OUTPUT:END -->
 
+## Configuration Guide
 
-## Filter Modes
+### Reporter Modes
 
-- **`added`** (default): Only show findings for lines added in the PR
-- **`diff_context`**: Show findings for lines in the diff context
-- **`file`**: Show findings for entire changed files
-- **`nofilter`**: Show all findings in the repository
+The `reporter` input determines how findings are displayed in your pull request or workflow.
 
-## Examples
+| Reporter | Description | Output Location | Permissions Required | Best For |
+|----------|-------------|----------------|---------------------|----------|
+| `github-pr-review` | Creates inline comments on PR | PR conversation & Files changed tab | `pull-requests: write`<br>`contents: read` | Code review, team collaboration |
+| `github-pr-check` | Creates check run with annotations | PR checks tab & Files changed | `checks: write`<br>`contents: read` | CI/CD pipelines, status checks |
+| `github-check` | Creates general check run | Actions tab | `checks: write`<br>`contents: read` | Branch monitoring, scheduled scans |
 
-### Scan only Terraform files
+#### Visual Comparison
+
+**github-pr-review** - Inline comments directly on your code:
+
+![PR Review Example](docs/images/github-pr-review.png)
+
+**github-pr-check** - Check annotations in the Files changed tab:
+
+![Check Annotation](docs/images/github-pr-check-annotation.png)
+
+Collapsible findings summary in the Checks tab:
+
+![Check Summary](docs/images/github-pr-check-summary.png)
+
+Expandable list of all findings:
+
+![Check Findings](docs/images/github-pr-check-findings.png)
+
+#### Reporter Examples
+
+**github-pr-review** - Inline PR Comments:
+```yaml
+name: Checkov PR Review
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write  # Required!
+  checks: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: fulgas/reviewdog-action-checkov@v2.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+```
+
+**github-pr-check** - Check Annotations:
+```yaml
+name: Checkov PR Check
+on: [pull_request]
+
+permissions:
+  contents: read
+  checks: write  # Required!
+  pull-requests: read  # Optional
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: fulgas/reviewdog-action-checkov@v2.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-check
+```
+
+**github-check** - General Checks:
+```yaml
+name: Checkov Scan
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: read
+  checks: write  # Required!
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: fulgas/reviewdog-action-checkov@v2.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-check
+```
+
+### Filter Modes
+
+The `filter_mode` input controls which findings are reported based on your PR changes.
+
+| Mode           | Shows Findings For             | Use Case              | Example                                        |
+|----------------|--------------------------------|-----------------------|------------------------------------------------|
+| `added`        | Only new/modified lines in PR  | New code review       | You add line 10, only issues on line 10 shown  |
+| `diff_context` | Lines in and around PR changes | Understanding context | You change line 10, issues on lines 8-12 shown |
+| `file`         | All lines in changed files     | File-level review     | You change 1 line, all issues in file shown    |
+| `nofilter`     | Entire repository              | Full security audit   | Shows all issues regardless of changes         |
+
+⚠️ **Warning:** `nofilter` can report hundreds of findings in large repositories! Use `added` or `diff_context` for PR reviews.
+
+### Severity Levels
+
+Control what gets reported and when workflows fail:
+
+| Input        | Values                             | Purpose                       | Example                                    |
+|--------------|------------------------------------|-------------------------------|--------------------------------------------|
+| `level`      | `info`, `warning`, `error`         | What findings to **show**     | `level: warning` shows warnings and errors |
+| `fail_level` | `none`, `info`, `warning`, `error` | When to **fail** the workflow | `fail_level: error` only fails on errors   |
+
+## Permissions Reference
+
+### Permission Requirements by Reporter
+
+Each reporter requires specific GitHub permissions to function properly:
+
+| Reporter           | Required Permissions                                          | Optional              |
+|--------------------|---------------------------------------------------------------|-----------------------|
+| `github-pr-review` | `contents: read`<br>`pull-requests: write`<br>`checks: write` | -                     |
+| `github-pr-check`  | `contents: read`<br>`checks: write`                           | `pull-requests: read` |
+| `github-check`     | `contents: read`<br>`checks: write`                           | -                     |
+
+## Examples Directory
+
+Ready-to-use workflow examples are available in the [`docs/examples/`](docs/examples/) directory.
+
+- **[basic-pr-review.yml](docs/examples/basic-pr-review.yml)** - Simple PR review with inline comments
+- **[ci-security-gate.yml](docs/examples/ci-security-gate.yml)** - Strict CI/CD gate that blocks on errors
+- **[terraform-scan.yml](docs/examples/terraform-scan.yml)** - Terraform-specific scanning
+- **[multi-framework.yml](docs/examples/multi-framework.yml)** - Scan multiple IaC frameworks
+- **[scheduled-audit.yml](docs/examples/scheduled-audit.yml)** - Weekly security audit
+
+Copy any of these to your `.github/workflows/` directory and customize as needed.
+
+See the [Configuration Guide](#configuration-guide) above for detailed explanations of all options.
+
+## Troubleshooting
+
+### Permission Errors
+
+**Error: "Resource not accessible by integration"**
+
+This means your workflow is missing required permissions.
+
+```yaml
+# Solution: Add the missing permission
+permissions:
+  contents: read
+  pull-requests: write  # Required for github-pr-review
+  checks: write         # Required for github-pr-check and github-check
+```
+
+**Error: "Not Found" or "403 Forbidden"**
+
+The `GITHUB_TOKEN` doesn't have access to the repository.
+
+```yaml
+# Solution: Ensure contents: read is set
+permissions:
+  contents: read  # Always required
+```
+
+### No Findings or Empty Output
+
+**Problem: Action runs but reports no findings**
+
+Possible causes:
+
+1. **Wrong target directory**
+   ```yaml
+   # Check your target_dir points to IaC files
+   with:
+     target_dir: "terraform/"  # Update to match your structure
+   ```
+
+2. **Wrong framework specified**
+   ```yaml
+   # Ensure framework matches your files
+   with:
+     framework: terraform  # Change to match your IaC type
+   ```
+
+3. **All checks skipped**
+   ```yaml
+   # Review your skip_check list
+   with:
+     skip_check: ""  # Remove if too many checks are skipped
+   ```
+
+### Too Many Findings
+
+**Problem: Hundreds of findings reported**
+
+**Solution: Use appropriate filter mode**
+
+```yaml
+# For PRs - only show new issues
+with:
+  filter_mode: added  # Only new/modified lines
+
+# For audits - expect many findings
+with:
+  filter_mode: nofilter  # Full repository scan
+  fail_level: none        # Don't block on findings
+```
+
+⚠️ **Warning:** `nofilter` can report hundreds of findings in large repositories. Use `added` or `diff_context` for PR reviews.
+
+### Check Not Appearing
+
+**Problem: Workflow runs but check doesn't appear on PR**
+
+1. **Wrong reporter for your use case**
+```yaml
+# For PR checks:
+reporter: github-pr-check  # Shows in Checks tab
+
+# For PR comments:
+reporter: github-pr-review  # Shows inline comments
+```
+
+2. **Missing permissions**
+   ```yaml
+   # Ensure you have the right permissions
+   permissions:
+     checks: write  # Required for check reporters
+   ```
+
+### Workflow Fails Unexpectedly
+
+**Problem: Workflow fails even with `fail_level: none`**
+
+**Cause:** Checkov itself failed (not findings, but an error running Checkov)
+
+**Solutions:**
+
+1. **Check Checkov logs** in the workflow output
+2. **Verify file syntax** - malformed IaC files can crash Checkov
+3. **Update target directory** - ensure it exists and contains files
+
+### Common Configuration Mistakes
+
+**Mistake 1: Using wrong reporter**
+```yaml
+# ❌ Wrong - using PR reporter on scheduled scan
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+jobs:
+  scan:
+    steps:
+      - uses: fulgas/reviewdog-action-checkov@v2.0.1
+        with:
+          reporter: github-pr-review  # Won't work on schedule
+
+# ✅ Correct
+          reporter: github-check  # Works for scheduled scans
+```
+
+**Mistake 2: Blocking PRs unintentionally**
+```yaml
+# ❌ Wrong - fail_level defaults to 'error'
+- uses: fulgas/reviewdog-action-checkov@v2.0.1
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    # No fail_level set - will block on errors!
+
+# ✅ Correct - explicit fail_level
+    fail_level: none  # Advisory mode, never blocks
+```
+
+**Mistake 3: Scanning wrong directory**
+```yaml
+# ❌ Wrong - defaults to current directory
+- uses: fulgas/reviewdog-action-checkov@v2.0.1
+  with:
+    # No target_dir - scans entire repo
+
+# ✅ Correct - specific directory
+    target_dir: "infrastructure/terraform"
+```
+
+### Token Issues
+
+**Problem: REVIEWDOG_GITHUB_API_TOKEN errors**
+
+**Solution:** Use the built-in `GITHUB_TOKEN`
 
 ```yaml
 - uses: fulgas/reviewdog-action-checkov@v2.0.1
   with:
-    github_token: ${{ secrets.github_token }}
-    framework: terraform
+    github_token: ${{ secrets.GITHUB_TOKEN }}  # Built-in token
 ```
 
-### Skip specific checks
+Don't create a custom token unless you have specific needs.
 
-```yaml
-- uses: fulgas/reviewdog-action-checkov@v2.0.1
-  with:
-    github_token: ${{ secrets.github_token }}
-    skip_check: "CKV_AWS_1 CKV_AWS_18 CKV_AWS_19"
-```
+### Getting Help
 
-### Scan specific directory
+If you're still having issues:
 
-```yaml
-- uses: fulgas/reviewdog-action-checkov@v2.0.1
-  with:
-    github_token: ${{ secrets.github_token }}
-    working_directory: infrastructure/
-    target_dir: terraform/
-```
-
-### Fail on warnings
-
-```yaml
-- uses: fulgas/reviewdog-action-checkov@v2.0.1
-  with:
-    github_token: ${{ secrets.github_token }}
-    fail_level: warning
-```
+1. **Check the [Configuration Guide](#configuration-guide)** for detailed examples
+2. **Review [workflow examples](docs/examples/)** for working configurations
+3. **Open an issue** with:
+    - Your workflow YAML
+    - Error messages from logs
+    - Expected vs actual behavior
 
 ## Development
 
@@ -199,9 +495,9 @@ docker build --platform linux/amd64 -t reviewdog-action-checkov:amd64 .
 docker build --platform linux/arm64 -t reviewdog-action-checkov:arm64 .
 ```
 
-### Testing
+### Running Tests
 
-The CI workflow automatically builds the Dockerfile and tests it against all supported frameworks (Terraform, CloudFormation, Kubernetes) on multiple platforms and Ubuntu versions. This ensures that changes to the Dockerfile are properly tested before being published to GHCR.
+The CI workflow automatically builds the Dockerfile and tests it against all supported frameworks (Terraform, CloudFormation, Kubernetes) on multiple platforms and Ubuntu versions.
 
 To test locally:
 
@@ -209,11 +505,11 @@ To test locally:
 # Build the image
 docker build -t reviewdog-action-checkov:test .
 
-# Run tests
+# Run against test files
 docker run --rm \
   -v $(pwd):/github/workspace \
   -e GITHUB_WORKSPACE=/github/workspace \
-  -e INPUT_GITHUB_TOKEN=your_token \
+  -e REVIEWDOG_GITHUB_API_TOKEN=your_token \
   -e INPUT_REPORTER=local \
   -e INPUT_FRAMEWORK=terraform \
   -e INPUT_TARGET_DIR=tests/terraform \
@@ -234,10 +530,27 @@ This approach provides the best of both worlds:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-When contributing, please:
-1. Follow the [semantic commit convention](CONTRIBUTING.md#commit-messages)
-2. Test your changes locally
-3. Update documentation as needed
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines including:
+- How to report issues
+- Pull request process
+- Code style guidelines
+- Semantic commit message format
+- Testing requirements
+
+### Quick Contribution Guide
+
+1. Fork the repository and create a branch from `main`
+2. Follow the [semantic commit convention](CONTRIBUTING.md#commit-messages)
+3. Test your changes locally
+4. Update documentation as needed
+5. Submit a pull request
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated versioning:
+- `feat:` → Minor version bump (new features)
+- `fix:` → Patch version bump (bug fixes)
+- `feat!:` → Major version bump (breaking changes)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md#format) for complete commit message guidelines and examples.
 
 ## License
 
@@ -245,5 +558,10 @@ When contributing, please:
 
 ## Credits
 
-- [Checkov](https://github.com/bridgecrewio/checkov) - IaC security scanner
+- [Checkov](https://github.com/bridgecrewio/checkov) - IaC security scanner by Bridgecrew/Prisma Cloud
 - [reviewdog](https://github.com/reviewdog/reviewdog) - Automated code review tool
+
+## Support
+
+- 🐛 [Issue Tracker](https://github.com/fulgas/reviewdog-action-checkov/issues)
+- ☕ [Buy me a coffee](https://buymeacoffee.com/fulgas)

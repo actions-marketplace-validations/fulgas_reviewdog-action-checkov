@@ -1,0 +1,24 @@
+name: CI Security Gate
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write  # Required for check runs
+
+jobs:
+  security-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Security Gate
+        uses: fulgas/reviewdog-action-checkov@v2.1.0
+        with:
+          reporter: github-pr-check  # Creates check annotations
+          level: error               # Only show errors
+          filter_mode: added         # Only new/modified lines
+          fail_level: error          # Block PR on errors

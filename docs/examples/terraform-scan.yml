@@ -1,0 +1,30 @@
+name: Terraform Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  terraform-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Scan Terraform Files
+        uses: fulgas/reviewdog-action-checkov@v2.1.0
+        with:
+          reporter: github-pr-review
+          framework: terraform           # Only scan Terraform
+          level: warning
+          filter_mode: diff_context
+          fail_level: error
+          skip_check: "CKV_AWS_18 CKV_AWS_19"  # Skip specific checks if needed

@@ -70,12 +70,11 @@ echo '::endgroup::'
 ###############################################################################
 echo '::group::🐶 Running reviewdog'
 
-export REVIEWDOG_GITHUB_API_TOKEN="${INPUT_GITHUB_TOKEN}"
 set +Eeuo pipefail
 # shellcheck disable=SC2002
 cat "${SARIF_FILE}" | reviewdog \
   -f=sarif \
-  -name="checkov" \
+  -name="${INPUT_TOOL_NAME}" \
   -reporter="${INPUT_REPORTER}" \
   -level="${INPUT_LEVEL}" \
   -filter-mode="${INPUT_FILTER_MODE}" \

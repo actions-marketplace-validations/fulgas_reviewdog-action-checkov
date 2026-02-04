@@ -1,4 +1,4 @@
-FROM alpine:3.23@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62 AS reviewdog-builder
+FROM alpine:3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS reviewdog-builder
 
 ARG TARGETARCH
 ENV REVIEWDOG_VERSION=v0.21.0
@@ -16,7 +16,7 @@ RUN apk add --no-cache curl && \
 
 FROM python:3.14-slim@sha256:9b81fe9acff79e61affb44aaf3b6ff234392e8ca477cb86c9f7fd11732ce9b6a AS python-builder
 
-ENV CHECKOV_VERSION=3.2.497
+ENV CHECKOV_VERSION=3.2.500
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

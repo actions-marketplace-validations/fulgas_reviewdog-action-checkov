@@ -1,4 +1,4 @@
-FROM alpine:3.23@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS reviewdog-builder
+FROM alpine:3.24@sha256:a2d49ea686c2adfe3c992e47dc3b5e7fa6e6b5055609400dc2acaeb241c829f4 AS reviewdog-builder
 
 ARG TARGETARCH
 ENV REVIEWDOG_VERSION=v0.21.0
@@ -14,9 +14,9 @@ RUN apk add --no-cache curl && \
     chmod +x /usr/local/bin/reviewdog
 
 
-FROM python:3.14-slim@sha256:c845af9399020c7e562969a13689e929074a10fd057acd1b1fad06a2fb068e97 AS python-builder
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061 AS python-builder
 
-ENV CHECKOV_VERSION=3.2.533
+ENV CHECKOV_VERSION=3.3.1
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -31,7 +31,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip install --no-cache-dir checkov==${CHECKOV_VERSION};
 
-FROM python:3.14-slim@sha256:c845af9399020c7e562969a13689e929074a10fd057acd1b1fad06a2fb068e97
+FROM python:3.14-slim@sha256:44dd04494ee8f3b538294360e7c4b3acb87c8268e4d0a4828a6500b1eff50061
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
